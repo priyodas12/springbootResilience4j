@@ -1,0 +1,57 @@
+spring:
+  application:
+  name: springbootResilience4j
+  devtools:
+    restart:
+      enabled: true
+
+server:
+  port: 12350
+
+resilience4j.circuitbreaker:
+  instances:
+    expressAPICircuitBreaker:
+      registerHealthIndicator: true # Indicates whether to register a health indicator for the Circuit Breaker instance.
+      slidingWindowSize: 10 # Sets the size of the sliding window to 10, meaning it will monitor the last 10 calls.
+      minimumNumberOfCalls: 5 # Specifies that at least 5 calls must be made before the Circuit Breaker starts monitoring for failures.
+      failureRateThreshold: 50 # meaning if the failure rate reaches or exceeds 50%, the Circuit Breaker will open.
+      permittedNumberOfCallsInHalfOpenState: 3 # Sets the maximum number of permitted calls in the half-open state to 3 before transitioning back to open.
+      automaticTransitionFromOpenToHalfOpenEnabled: true #Enables automatic transition from open to half-open state once the waitDurationInOpenState has passed.
+      waitDurationInOpenState: 5000 #Sets the wait duration in open state to 5000 milliseconds (5seconds) before transitioning to half-open
+
+resilience4j.retry:
+  configs:
+    default:
+      maxAttempts: 3
+      waitDuration: 1s
+  instances:
+    expressAPICircuitBreaker:
+      baseConfig: default
+
+management:
+  server:
+    port: 12350
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+    circuitbreakers:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
+
+
